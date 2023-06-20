@@ -17,6 +17,7 @@ module udev.context;
 
 static import udev.binding;
 public import std.typecons : safeRefCounted, borrow;
+import udev.enumerator;
 
 /**
  * Wraps `udev*` to provide a context type
@@ -35,6 +36,15 @@ public struct Context
         {
             handle = udev.binding.udev_unref(handle);
         }
+    }
+
+    /**
+     * Returns: a new enumerator for this context
+     */
+    auto enumerator() @trusted
+    {
+        auto h = udev.binding.udev_enumerate_new(this.handle);
+        return Enumerator(h);
     }
 
 private:

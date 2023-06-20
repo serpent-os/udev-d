@@ -36,7 +36,18 @@ public struct Enumerator
         }
     }
 
-private:
+package:
+
+    /**
+     * Construct a new Enumerator from the given handle
+     *
+     * Params:
+     *   handle = Underlying udev resource
+     */
+    pure this(udev.binding.udev_enumerate* handle) @safe
+    {
+        this.handle = handle;
+    }
 
     /**
      * Copy from another enumerator
@@ -50,4 +61,12 @@ private:
     }
 
     udev.binding.udev_enumerate* handle;
+}
+
+@("Test enumeration")
+@safe unittest
+{
+    import udev.context;
+
+    auto devices = context.enumerator;
 }
