@@ -1,0 +1,16 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/udev-d
+udev-d.so
+udev-d.dylib
+udev-d.dll
+udev-d.a
+udev-d.lib
+udev-d-test-*
+*.exe
+*.pdb
+*.o
+*.obj
+*.lst
