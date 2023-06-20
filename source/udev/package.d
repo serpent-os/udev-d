@@ -16,3 +16,4 @@
 module udev;
 
 public import udev.context;
+public import udev.device;
