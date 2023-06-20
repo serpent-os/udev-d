@@ -17,6 +17,8 @@ module udev.enumerator;
 
 static import udev.binding;
 
+import udev.device : Device;
+
 /**
  * Sanely enumerate devices on the udev subsystems
  */
@@ -35,6 +37,11 @@ public struct Enumerator
             handle = udev.binding.udev_enumerate_unref(handle);
         }
     }
+
+    /**
+     * Return an iterator for the discovered devices
+     */
+    auto opSlice() @trusted => Iterator!Device(udev.binding.udev_enumerate_get_list_entry(handle));
 
 package:
 
@@ -67,6 +74,41 @@ package:
 @safe unittest
 {
     import udev.context;
+    import std.stdio : writeln;
 
-    auto devices = context.enumerator;
+    foreach (device; context.enumerator[])
+    {
+        device.writeln;
+    }
+}
+
+/**
+ * A specialist iterator for udev lists
+ * Note: Currently locked to devices
+ */
+package struct Iterator(T) if (is(T : Device))
+{
+
+    auto empty() => list is null;
+    auto popFront() @trusted => list = udev.binding.udev_list_entry_get_next(list);
+
+    /**
+     * Returns the front node of the list
+     */
+    T front() @trusted
+    {
+        auto frontNode = udev.binding.udev_list_entry_get_value(list);
+        static if (is(T : Device))
+        {
+            auto handle = udev.binding.udev_device_new_from_syspath(context, frontNode);
+            return T(handle);
+        }
+        else
+            static assert(0, "wtf");
+    }
+
+private:
+
+    udev.binding.udev_list_entry* list;
+    udev.binding.udev* context;
 }

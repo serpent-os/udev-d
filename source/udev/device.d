@@ -47,7 +47,12 @@ public struct Device
         }
     }
 
-private:
+package:
+
+    pure this(udev.binding.udev_device* handle) @safe
+    {
+        this.handle = handle;
+    }
 
     udev.binding.udev_device* handle;
 }
