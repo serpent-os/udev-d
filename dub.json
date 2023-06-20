@@ -6,5 +6,6 @@
     "description": "udev bindings",
     "license": "Zlib",
     "name": "udev-d",
-    "libs-posix": ["libudev"]
+    "libs-posix": ["libudev"],
+    "dflags": ["-preview=dip1000"]
 }
