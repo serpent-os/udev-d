@@ -6,7 +6,7 @@ dstep -o binding.d \
         /usr/include/libudev.h \
         --rename-enum-members=true \
         --package udev \
-        --comments=false \
+        --comments=true \
         --global-attribute '@nogc' \
         --global-attribute 'nothrow'
 
