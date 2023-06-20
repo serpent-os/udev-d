@@ -15,5 +15,4 @@
 
 module udev;
 
-// FIXME: Users should include manually
-import udev.binding;
+public import udev.context;
