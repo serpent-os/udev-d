@@ -5,10 +5,10 @@ set -x
 dstep -o binding.d \
         /usr/include/libudev.h \
         --rename-enum-members=true \
-        --package udev \
+        --package udevd \
         --comments=true \
         --global-attribute '@nogc' \
         --global-attribute 'nothrow'
 
-cp binding.d source/udev/binding.d
+cp binding.d source/udevd/binding.d
 rm binding.d

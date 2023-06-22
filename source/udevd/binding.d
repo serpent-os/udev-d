@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: LGPL-2.1-or-later */
 
-module udev.binding;
+module udevd.binding;
 
 import core.stdc.stdarg;
 import core.sys.posix.sys.types;
