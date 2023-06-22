@@ -17,6 +17,9 @@ module udev.device;
 
 static import udev.binding;
 
+import udev.exc;
+import std.exception : enforce;
+
 /**
  * Provides safe encapsulation of `udev_device*`
  */
@@ -33,7 +36,7 @@ public struct Device
      */
     this(ref Device other) @trusted
     {
-        this.handle = udev.binding.udev_device_ref(other.handle);
+        this.handle = udev.binding.udev_device_ref(other.handle).enforce!UdevException;
     }
 
     /**

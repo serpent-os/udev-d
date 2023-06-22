@@ -18,6 +18,8 @@ module udev.enumerator;
 static import udev.binding;
 
 import udev.device : Device;
+import udev.exc;
+import std.exception : enforce;
 
 /**
  * Sanely enumerate devices on the udev subsystems
@@ -64,7 +66,7 @@ package:
      */
     this(ref Enumerator other) @trusted
     {
-        this.handle = udev.binding.udev_enumerate_ref(other.handle);
+        this.handle = udev.binding.udev_enumerate_ref(other.handle).enforce!UdevException;
     }
 
     udev.binding.udev_enumerate* handle;
@@ -100,7 +102,8 @@ package struct Iterator(T) if (is(T : Device))
         auto frontNode = udev.binding.udev_list_entry_get_value(list);
         static if (is(T : Device))
         {
-            auto handle = udev.binding.udev_device_new_from_syspath(context, frontNode);
+            auto handle = udev.binding.udev_device_new_from_syspath(context,
+                    frontNode).enforce!UdevException;
             return T(handle);
         }
         else
