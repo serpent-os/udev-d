@@ -17,6 +17,7 @@ module udev.enumerator;
 
 static import udev.binding;
 
+import udev.context : Context;
 import udev.device : Device;
 import udev.exc;
 import std.exception : enforce;
@@ -31,7 +32,7 @@ public struct Enumerator
 
     invariant ()
     {
-        assert(handle !is null, "udev.Enumerator: Missing handle");
+        //assert(handle !is null, "udev.Enumerator: Missing handle");
     }
 
     /**
@@ -48,7 +49,15 @@ public struct Enumerator
     /**
      * Return an iterator for the discovered devices
      */
-    auto opSlice() @trusted => Iterator!Device(udev.binding.udev_enumerate_get_list_entry(handle));
+    auto opSlice() @trusted => Iterator!Device(
+            udev.binding.udev_enumerate_get_list_entry(handle), this);
+
+    auto ref scanDevices() @trusted
+    {
+        immutable ret = udev.binding.udev_enumerate_scan_devices(handle);
+        enforce!UdevException(ret >= 0);
+        return this;
+    }
 
 package:
 
@@ -58,9 +67,10 @@ package:
      * Params:
      *   handle = Underlying udev resource
      */
-    pure this(udev.binding.udev_enumerate* handle) @safe
+    this()(auto ref Context parentContext, udev.binding.udev_enumerate* handle) @trusted
     {
-        this.handle = handle;
+        this.parentContext = Context(parentContext);
+        this.handle = udev.binding.udev_enumerate_ref(handle).enforce!UdevException;
     }
 
     /**
@@ -69,13 +79,19 @@ package:
      * Params:
      *   other = Instantiated enumerator
      */
-    this(ref Enumerator other) @trusted
+    this()(auto ref Enumerator other) @trusted
     {
         this.handle = udev.binding.udev_enumerate_ref(other.handle).enforce!UdevException;
     }
 
+private:
+
+    Context parentContext;
     udev.binding.udev_enumerate* handle;
 }
+
+auto enumerator()(auto ref Context context) @trusted => Enumerator(context,
+        udev.binding.udev_enumerate_new(context.handle).enforce!UdevException);
 
 @("Test enumeration")
 @safe unittest
@@ -83,9 +99,10 @@ package:
     import udev.context;
     import std.stdio : writeln;
 
-    foreach (device; context.enumerator[])
+    foreach (d; context.enumerator.scanDevices)
     {
-        device.writeln;
+        d.path.writeln;
+        d.name.writeln;
     }
 }
 
@@ -99,20 +116,15 @@ package struct Iterator(T) if (is(T : Device))
     auto empty() => list is null;
     auto popFront() @trusted => list = udev.binding.udev_list_entry_get_next(list);
 
-    invariant ()
-    {
-        assert(context !is null, "udev.Iterator: Missing handle");
-    }
-
     /**
      * Returns the front node of the list
      */
     T front() @trusted
     {
-        auto frontNode = udev.binding.udev_list_entry_get_value(list);
+        auto frontNode = udev.binding.udev_list_entry_get_name(list);
         static if (is(T : Device))
         {
-            auto handle = udev.binding.udev_device_new_from_syspath(context,
+            auto handle = udev.binding.udev_device_new_from_syspath(parentEnum.parentContext.handle,
                     frontNode).enforce!UdevException;
             return T(handle);
         }
@@ -123,5 +135,5 @@ package struct Iterator(T) if (is(T : Device))
 private:
 
     udev.binding.udev_list_entry* list;
-    udev.binding.udev* context;
+    Enumerator parentEnum;
 }

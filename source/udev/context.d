@@ -39,16 +39,7 @@ public struct Context
         }
     }
 
-    /**
-     * Returns: a new enumerator for this context
-     */
-    auto enumerator() @trusted
-    {
-        auto h = udev.binding.udev_enumerate_new(this.handle).enforce!UdevException;
-        return Enumerator(h);
-    }
-
-private:
+package:
 
     /**
      * Copy a udev context by increasing the refcount
@@ -56,12 +47,19 @@ private:
      * Params:
      *   other = The other udev Context
      */
-    this(ref Context other) @trusted
+    this()(auto ref Context other) @trusted
     {
         this.handle = udev.binding.udev_ref(other.handle).enforce!UdevException;
     }
 
     udev.binding.udev* handle;
+
+private:
+
+    this(udev.binding.udev* handle) @trusted
+    {
+        this.handle = udev.binding.udev_ref(handle);
+    }
 }
 
 /**
@@ -71,13 +69,5 @@ private:
  */
 auto context() @trusted
 {
-    Context c = {handle: udev.binding.udev_new().enforce!UdevException};
-    return c;
-}
-
-@safe unittest
-{
-    import std.stdio : writeln;
-
-    auto c = context.safeRefCounted;
+    return Context(udev.binding.udev_new.enforce!UdevException);
 }

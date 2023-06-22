@@ -19,6 +19,7 @@ static import udev.binding;
 
 import udev.exc;
 import std.exception : enforce;
+import std.string : fromStringz;
 
 /**
  * Provides safe encapsulation of `udev_device*`
@@ -55,9 +56,12 @@ public struct Device
         }
     }
 
+    @property path() @trusted => udev.binding.udev_device_get_syspath(handle).fromStringz;
+    @property name() @trusted => udev.binding.udev_device_get_sysname(handle).fromStringz;
+
 package:
 
-    pure this(udev.binding.udev_device* handle) @safe
+    this(udev.binding.udev_device* handle) @trusted
     {
         this.handle = handle;
     }
