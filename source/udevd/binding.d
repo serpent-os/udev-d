@@ -1,5 +1,3 @@
-/* SPDX-License-Identifier: LGPL-2.1-or-later */
-
 module udevd.binding;
 
 import core.stdc.stdarg;
@@ -9,12 +7,6 @@ extern (C):
 @nogc:
 nothrow:
 
-/*
- * udev - library context
- *
- * reads the udev config and system environment
- * allows custom logging
- */
 struct udev;
 udev* udev_ref(udev* udev);
 udev* udev_unref(udev* udev);
@@ -26,29 +18,12 @@ void udev_set_log_priority(udev* udev, int priority);
 void* udev_get_userdata(udev* udev);
 void udev_set_userdata(udev* udev, void* userdata);
 
-/*
- * udev_list
- *
- * access to libudev generated lists
- */
 struct udev_list_entry;
 udev_list_entry* udev_list_entry_get_next(udev_list_entry* list_entry);
 udev_list_entry* udev_list_entry_get_by_name(udev_list_entry* list_entry, const(char)* name);
 const(char)* udev_list_entry_get_name(udev_list_entry* list_entry);
 const(char)* udev_list_entry_get_value(udev_list_entry* list_entry);
-/**
- * udev_list_entry_foreach:
- * @list_entry: entry to store the current position
- * @first_entry: first entry to start with
- *
- * Helper to iterate over all entries of a list.
- */
 
-/*
- * udev_device
- *
- * access to sysfs/kernel devices
- */
 struct udev_device;
 udev_device* udev_device_ref(udev_device* udev_device);
 udev_device* udev_device_unref(udev_device* udev_device);
@@ -59,11 +34,11 @@ udev_device* udev_device_new_from_subsystem_sysname(udev* udev,
         const(char)* subsystem, const(char)* sysname);
 udev_device* udev_device_new_from_device_id(udev* udev, const(char)* id);
 udev_device* udev_device_new_from_environment(udev* udev);
-/* udev_device_get_parent_*() does not take a reference on the returned device, it is automatically unref'd with the parent */
+
 udev_device* udev_device_get_parent(udev_device* udev_device);
 udev_device* udev_device_get_parent_with_subsystem_devtype(
         udev_device* udev_device, const(char)* subsystem, const(char)* devtype);
-/* retrieve device properties */
+
 const(char)* udev_device_get_devpath(udev_device* udev_device);
 const(char)* udev_device_get_subsystem(udev_device* udev_device);
 const(char)* udev_device_get_devtype(udev_device* udev_device);
@@ -89,40 +64,30 @@ int udev_device_set_sysattr_value(udev_device* udev_device,
 int udev_device_has_tag(udev_device* udev_device, const(char)* tag);
 int udev_device_has_current_tag(udev_device* udev_device, const(char)* tag);
 
-/*
- * udev_monitor
- *
- * access to kernel uevents and udev events
- */
 struct udev_monitor;
 udev_monitor* udev_monitor_ref(udev_monitor* udev_monitor);
 udev_monitor* udev_monitor_unref(udev_monitor* udev_monitor);
 udev* udev_monitor_get_udev(udev_monitor* udev_monitor);
-/* kernel and udev generated events over netlink */
+
 udev_monitor* udev_monitor_new_from_netlink(udev* udev, const(char)* name);
-/* bind socket */
+
 int udev_monitor_enable_receiving(udev_monitor* udev_monitor);
 int udev_monitor_set_receive_buffer_size(udev_monitor* udev_monitor, int size);
 int udev_monitor_get_fd(udev_monitor* udev_monitor);
 udev_device* udev_monitor_receive_device(udev_monitor* udev_monitor);
-/* in-kernel socket filters to select messages that get delivered to a listener */
+
 int udev_monitor_filter_add_match_subsystem_devtype(udev_monitor* udev_monitor,
         const(char)* subsystem, const(char)* devtype);
 int udev_monitor_filter_add_match_tag(udev_monitor* udev_monitor, const(char)* tag);
 int udev_monitor_filter_update(udev_monitor* udev_monitor);
 int udev_monitor_filter_remove(udev_monitor* udev_monitor);
 
-/*
- * udev_enumerate
- *
- * search sysfs for specific devices and provide a sorted list
- */
 struct udev_enumerate;
 udev_enumerate* udev_enumerate_ref(udev_enumerate* udev_enumerate);
 udev_enumerate* udev_enumerate_unref(udev_enumerate* udev_enumerate);
 udev* udev_enumerate_get_udev(udev_enumerate* udev_enumerate);
 udev_enumerate* udev_enumerate_new(udev* udev);
-/* device properties filter */
+
 int udev_enumerate_add_match_subsystem(udev_enumerate* udev_enumerate, const(char)* subsystem);
 int udev_enumerate_add_nomatch_subsystem(udev_enumerate* udev_enumerate, const(char)* subsystem);
 int udev_enumerate_add_match_sysattr(udev_enumerate* udev_enumerate,
@@ -136,17 +101,12 @@ int udev_enumerate_add_match_tag(udev_enumerate* udev_enumerate, const(char)* ta
 int udev_enumerate_add_match_parent(udev_enumerate* udev_enumerate, udev_device* parent);
 int udev_enumerate_add_match_is_initialized(udev_enumerate* udev_enumerate);
 int udev_enumerate_add_syspath(udev_enumerate* udev_enumerate, const(char)* syspath);
-/* run enumeration with active filters */
+
 int udev_enumerate_scan_devices(udev_enumerate* udev_enumerate);
 int udev_enumerate_scan_subsystems(udev_enumerate* udev_enumerate);
-/* return device list */
+
 udev_list_entry* udev_enumerate_get_list_entry(udev_enumerate* udev_enumerate);
 
-/*
- * udev_queue
- *
- * access to the currently running udev events
- */
 struct udev_queue;
 udev_queue* udev_queue_ref(udev_queue* udev_queue);
 udev_queue* udev_queue_unref(udev_queue* udev_queue);
@@ -162,11 +122,6 @@ int udev_queue_get_fd(udev_queue* udev_queue);
 int udev_queue_flush(udev_queue* udev_queue);
 udev_list_entry* udev_queue_get_queued_list_entry(udev_queue* udev_queue);
 
-/*
- *  udev_hwdb
- *
- *  access to the static hardware properties database
- */
 struct udev_hwdb;
 udev_hwdb* udev_hwdb_new(udev* udev);
 udev_hwdb* udev_hwdb_ref(udev_hwdb* hwdb);
@@ -174,11 +129,4 @@ udev_hwdb* udev_hwdb_unref(udev_hwdb* hwdb);
 udev_list_entry* udev_hwdb_get_properties_list_entry(udev_hwdb* hwdb,
         const(char)* modalias, uint flags);
 
-/*
- * udev_util
- *
- * udev specific utilities
- */
 int udev_util_encode_string(const(char)* str, char* str_enc, size_t len);
-
-/* extern "C" */
