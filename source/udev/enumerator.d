@@ -29,6 +29,11 @@ public struct Enumerator
 
     @disable this();
 
+    invariant ()
+    {
+        assert(handle !is null, "udev.Enumerator: Missing handle");
+    }
+
     /**
      * Cleanup the enumerator
      */
@@ -93,6 +98,11 @@ package struct Iterator(T) if (is(T : Device))
 
     auto empty() => list is null;
     auto popFront() @trusted => list = udev.binding.udev_list_entry_get_next(list);
+
+    invariant ()
+    {
+        assert(context !is null, "udev.Iterator: Missing handle");
+    }
 
     /**
      * Returns the front node of the list

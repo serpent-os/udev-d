@@ -28,6 +28,11 @@ public struct Device
 
     @disable this();
 
+    invariant ()
+    {
+        assert(handle !is null, "udev.Device: Missing handle");
+    }
+
     /**
      * Copy this device from another
      *
